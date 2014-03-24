@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from bisect import bisect
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 
 from django.apps import apps
 from django.conf import settings
@@ -21,6 +21,8 @@ DEFAULT_NAMES = ('verbose_name', 'verbose_name_plural', 'db_table', 'ordering',
                  'abstract', 'managed', 'proxy', 'swappable', 'auto_created',
                  'index_together', 'apps', 'default_permissions',
                  'select_on_save')
+
+BoundModelField = namedtuple('BoundModelField', "field_object model direct m2m")
 
 
 def normalize_together(option_together):
@@ -47,6 +49,7 @@ def normalize_together(option_together):
 
 @python_2_unicode_compatible
 class Options(object):
+
     def __init__(self, meta, app_label=None):
         self.local_fields = []
         self.local_many_to_many = []
@@ -430,15 +433,15 @@ class Options(object):
         # We intentionally handle related m2m objects first so that symmetrical
         # m2m accessor names can be overridden, if necessary.
         for f, model in self.get_all_related_m2m_objects_with_model():
-            cache[f.field.related_query_name()] = (f, model, False, True)
+            cache[f.field.related_query_name()] = BoundModelField(f, model, False, True)
         for f, model in self.get_all_related_objects_with_model():
-            cache[f.field.related_query_name()] = (f, model, False, False)
+            cache[f.field.related_query_name()] = BoundModelField(f, model, False, False)
         for f, model in self.get_m2m_with_model():
-            cache[f.name] = cache[f.attname] = (f, model, True, True)
+            cache[f.name] = cache[f.attname] = BoundModelField(f, model, True, True)
         for f, model in self.get_fields_with_model():
-            cache[f.name] = cache[f.attname] = (f, model, True, False)
+            cache[f.name] = cache[f.attname] = BoundModelField(f, model, True, False)
         for f in self.virtual_fields:
-            cache[f.name] = (f, None if f.model == self.model else f.model, True, False)
+            cache[f.name] = BoundModelField(f, None if f.model == self.model else f.model, True, False)
         if apps.ready:
             self._name_map = cache
         return cache
