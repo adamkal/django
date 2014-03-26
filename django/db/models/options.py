@@ -22,7 +22,7 @@ DEFAULT_NAMES = ('verbose_name', 'verbose_name_plural', 'db_table', 'ordering',
                  'index_together', 'apps', 'default_permissions',
                  'select_on_save')
 
-BoundModelField = namedtuple('BoundModelField', "field_object model direct m2m")
+BoundModelField = namedtuple('BoundModelField', "field model direct m2m")
 
 
 def normalize_together(option_together):

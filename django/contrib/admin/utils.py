@@ -23,7 +23,7 @@ def lookup_needs_distinct(opts, lookup_path):
     Returns True if 'distinct()' should be used to query the given lookup path.
     """
     field_name = lookup_path.split('__', 1)[0]
-    field = opts.get_field_by_name(field_name)[0]
+    field = opts.get_field_by_name(field_name).field
     if hasattr(field, 'get_path_info') and any(path.m2m for path in field.get_path_info()):
         return True
     return False
@@ -297,7 +297,7 @@ def label_for_field(name, model, model_admin=None, return_attr=False):
     """
     attr = None
     try:
-        field = model._meta.get_field_by_name(name)[0]
+        field = model._meta.get_field_by_name(name).field
         try:
             label = field.verbose_name
         except AttributeError:
@@ -349,7 +349,7 @@ def help_text_for_field(name, model):
     except models.FieldDoesNotExist:
         pass
     else:
-        field = field_data[0]
+        field = field_data.field
         if hasattr(field, 'help_text'):
             help_text = field.help_text
     return smart_text(help_text)
@@ -454,7 +454,7 @@ def get_fields_from_path(model, path):
             parent = get_model_from_relation(fields[-1])
         else:
             parent = model
-        fields.append(parent._meta.get_field_by_name(piece)[0])
+        fields.append(parent._meta.get_field_by_name(piece).field)
     return fields
 
 

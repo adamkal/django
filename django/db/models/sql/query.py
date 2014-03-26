@@ -589,7 +589,7 @@ class Query(object):
             opts = orig_opts
             for name in parts[:-1]:
                 old_model = cur_model
-                source = opts.get_field_by_name(name)[0]
+                source = opts.get_field_by_name(name).field
                 if is_reverse_o2o(source):
                     cur_model = source.model
                 else:

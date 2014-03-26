@@ -1220,11 +1220,11 @@ class ManyToOneRel(ForeignObjectRel):
         Returns the Field in the 'to' object to which this relationship is
         tied.
         """
-        data = self.to._meta.get_field_by_name(self.field_name)
-        if not data[2]:
+        field_data = self.to._meta.get_field_by_name(self.field_name)
+        if not field_data.direct:
             raise FieldDoesNotExist("No related field named '%s'" %
                     self.field_name)
-        return data[0]
+        return field_data.field
 
     def set_field_name(self):
         self.field_name = self.field_name or self.to._meta.pk.name
@@ -1380,9 +1380,9 @@ class ForeignObject(RelatedField):
             from_field_name = self.from_fields[index]
             to_field_name = self.to_fields[index]
             from_field = (self if from_field_name == 'self'
-                          else self.opts.get_field_by_name(from_field_name)[0])
+                          else self.opts.get_field_by_name(from_field_name).field)
             to_field = (self.rel.to._meta.pk if to_field_name is None
-                        else self.rel.to._meta.get_field_by_name(to_field_name)[0])
+                        else self.rel.to._meta.get_field_by_name(to_field_name).field)
             related_fields.append((from_field, to_field))
         return related_fields
 
@@ -2108,8 +2108,8 @@ class ManyToManyField(RelatedField):
         """
         pathinfos = []
         int_model = self.rel.through
-        linkfield1 = int_model._meta.get_field_by_name(self.m2m_field_name())[0]
-        linkfield2 = int_model._meta.get_field_by_name(self.m2m_reverse_field_name())[0]
+        linkfield1 = int_model._meta.get_field_by_name(self.m2m_field_name()).field
+        linkfield2 = int_model._meta.get_field_by_name(self.m2m_reverse_field_name()).field
         if direct:
             join1infos = linkfield1.get_reverse_path_info()
             join2infos = linkfield2.get_path_info()
